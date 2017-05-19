@@ -12,8 +12,7 @@ module.exports = {
   },
 
   included: function included(app) {
-    this.styleLintOptions = app.options.stylelint || {};
-    console.log('Options: ' + Object.keys(this.styleLintOptions));
+    this.styleLintOptions = app.options['ember-cli-stylelint-suave'] || {};
     this.styleLintOptions.console = console;
   },
 
@@ -25,25 +24,28 @@ module.exports = {
 
     this.styleLintOptions.testGenerator =  function(relativePath, errors) {
       var passed = null;
-      var name = relativePath+' should pass style lint';
+      var name = relativePath + ' should pass style lint';
       if (errors) {
         passed = false;
         var assertions = [name];
-        for(var i = 0; i < errors.warnings.length; i++){
+        for (var i = 0; i < errors.warnings.length; i++) {
           var warning = errors.warnings[i];
-          assertions.push(this.escapeErrorString('line: '+warning.line+', col: '+warning.column+' '+warning.text+'.'));
+          var warningString = 'line: ' + warning.line + ', col: ' + warning.column + ' ' + warning.text + '.';
+          assertions.push(this.escapeErrorString(warningString));
         }
         errors = assertions.join('\\n');
       } else {
         passed = true;
-        errors = "";
+        errors = '';
       }
 
-      return project.generateTestFile(' Style Lint ', [{
-        name: name,
-        passed: !!passed,
-        errorMessage: errors
-      }]);
+      return project.generateTestFile(' Style Lint ', [
+        {
+          name: name,
+          passed: !!passed,
+          errorMessage: errors
+        }
+      ]);
     };
 
     var toBeLinted = [ this.app.trees.styles ];
